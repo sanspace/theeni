@@ -14,8 +14,10 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  Link,
 } from '@mui/material';
 import axios from 'axios';
+import { CSVLink } from 'react-csv';
 
 // A helper to format dates to YYYY-MM-DD
 const toYYYYMMDD = (date: Date) => date.toISOString().split('T')[0];
@@ -60,6 +62,14 @@ export default function ReportsPage() {
     setToday();
   }, []);
 
+  const csvHeaders = [
+    { label: 'Item Name', key: 'name' },
+    { label: 'Quantity Sold (kg)', key: 'total_quantity_sold' },
+    { label: 'Total Revenue (INR)', key: 'total_revenue_from_item' }
+  ]
+
+  const csvFilename = `theeni-sales-${startDate}-to-${endDate}.csv`;
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Sales Reports</Typography>
@@ -69,6 +79,21 @@ export default function ReportsPage() {
         <TextField type="date" label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} InputLabelProps={{ shrink: true }}/>
         <Button variant="contained" onClick={handleGenerateReport} disabled={isLoading}>Generate Report</Button>
         <Button variant="outlined" onClick={setToday}>Today's Report</Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          disabled={!reportData || isLoading}
+        >
+          {/* The CSVLink component wraps our button text. It's not visible itself. */}
+          <CSVLink
+            data={reportData ? reportData.sales_by_item : []}
+            headers={csvHeaders}
+            filename={csvFilename}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            Export to CSV
+          </CSVLink>
+        </Button>
       </Paper>
 
       {isLoading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box>}
