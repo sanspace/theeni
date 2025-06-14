@@ -8,9 +8,11 @@ import Cart from '../components/Cart';
 import { useCartStore } from '../store/cartStore';
 import QuantitySelectorDialog from '../components/QuantitySelectorDialog';
 import CheckoutDialog from '../components/CheckoutDialog';
+import { useSnackbar } from 'notistack';
 
 
 function PosPage() {
+  const { enqueueSnackbar } = useSnackbar();
   const items = useLoaderData() as Item[];
   const upsertItemInCart = useCartStore((state) => state.upsertItem);
 
@@ -26,6 +28,10 @@ function PosPage() {
   const handleConfirmQuantity = (item: Item, quantity: number) => {
     upsertItemInCart(item, quantity);
     setSelectedItem(null); // Close the dialog
+    enqueueSnackbar(`${quantity.toFixed(3)}kg of ${item.name} added to cart.`, {
+      variant: 'success',
+      anchorOrigin: { vertical: 'bottom', horizontal: 'center' } 
+    });
   };
 
   return (

@@ -8,16 +8,18 @@ import {
   TextField,
   Button,
 } from '@mui/material';
-import { useCartStore } from '../store/cartStore';
+import { useCartStore, type CartItem } from '../store/cartStore'; // Assuming CartItem is exported from your store
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { useSnackbar } from 'notistack';
 
 interface CartProps {
   onCheckout: () => void;
 }
 
-export default function Cart({ onCheckout}: CartProps) {
+export default function Cart({ onCheckout }: CartProps) {
+  const { enqueueSnackbar } = useSnackbar();
   const {
     cart,
     incrementItem,
@@ -27,12 +29,10 @@ export default function Cart({ onCheckout}: CartProps) {
     applyDiscount,
   } = useCartStore();
 
-  // Local state for the discount input field
   const [discountInput, setDiscountInput] = useState(
     discountPercentage.toString()
   );
 
-  // Calculations
   const subTotal = cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -44,15 +44,20 @@ export default function Cart({ onCheckout}: CartProps) {
     const percentage = parseFloat(discountInput);
     if (!isNaN(percentage)) {
       applyDiscount(percentage);
+      enqueueSnackbar(`${percentage}% discount applied!`, { variant: 'info' });
     }
   };
-
+  
   const handleDiscountKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
       handleApplyDiscount();
-      // Prevents form submission or other default 'Enter' behaviors
-      event.preventDefault(); 
+      event.preventDefault();
     }
+  };
+
+  const handleRemoveItem = (item: CartItem) => {
+    removeItem(item.id);
+    enqueueSnackbar(`${item.name} removed from cart`, { variant: 'error' });
   };
 
   return (
@@ -81,7 +86,6 @@ export default function Cart({ onCheckout}: CartProps) {
               elevation={2}
               sx={{ p: 1.5, display: 'flex', alignItems: 'center' }}
             >
-              {/* Item Name and Price */}
               <Box sx={{ flexGrow: 1, mr: 1 }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                   {item.name}
@@ -91,7 +95,6 @@ export default function Cart({ onCheckout}: CartProps) {
                 </Typography>
               </Box>
 
-              {/* Quantity Controls */}
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
               >
@@ -120,9 +123,8 @@ export default function Cart({ onCheckout}: CartProps) {
                 </IconButton>
               </Box>
 
-              {/* Remove Item Button */}
               <IconButton
-                onClick={() => removeItem(item.id)}
+                onClick={() => handleRemoveItem(item)}
                 size="small"
                 sx={{ ml: 1 }}
               >
@@ -135,7 +137,6 @@ export default function Cart({ onCheckout}: CartProps) {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Discount and Totals Section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="body1">Subtotal:</Typography>
@@ -149,7 +150,7 @@ export default function Cart({ onCheckout}: CartProps) {
             size="small"
             value={discountInput}
             onChange={(e) => setDiscountInput(e.target.value)}
-            onKeyDown={handleDiscountKeyPress} 
+            onKeyDown={handleDiscountKeyPress}
             sx={{ flexGrow: 1 }}
           />
           <Button variant="outlined" onClick={handleApplyDiscount}>
@@ -188,7 +189,6 @@ export default function Cart({ onCheckout}: CartProps) {
         </Box>
       </Box>
 
-      {/* Checkout Button */}
       <Button
         variant="contained"
         fullWidth
