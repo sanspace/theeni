@@ -1,0 +1,91 @@
+// src/store/cartStore.ts
+import { create } from 'zustand';
+import { type Item } from '../types';
+
+export interface CartItem extends Item {
+  quantity: number; // Quantity will now represent kg
+}
+
+interface CartState {
+  cart: CartItem[];
+  discountPercentage: number;
+
+  // actions
+  upsertItem: (item: Item, quantity: number) => void; // "upsert" = update or insert
+  removeItem: (itemId: number) => void;
+  incrementItem: (itemId: number) => void;
+  decrementItem: (itemId: number) => void;
+  applyDiscount: (percentage: number) => void;
+  clearCart: () => void;
+}
+
+const MINIMUM_QTY_STEP = 0.25;
+
+export const useCartStore = create<CartState>((set, get) => ({
+  cart: [],
+  discountPercentage: 0,
+
+  upsertItem: (item, quantity) => {
+    const { cart } = get();
+    const itemExists = cart.find((cartItem) => cartItem.id === item.id);
+
+    if (itemExists) {
+      // If item exists, update its quantity by adding the new quantity
+      const updatedCart = cart.map((cartItem) =>
+        cartItem.id === item.id
+          ? { ...cartItem, quantity: cartItem.quantity + quantity }
+          : cartItem
+      );
+      set({ cart: updatedCart });
+    } else {
+      // If item is new, add it with the specified quantity
+      const updatedCart = [...cart, { ...item, quantity }];
+      set({ cart: updatedCart });
+    }
+  },
+
+  // Action to completely remove an item from the cart
+  removeItem: (itemId) => {
+    set({ cart: get().cart.filter((cartItem) => cartItem.id !== itemId) });
+  },
+
+  incrementItem: (itemId) => {
+    const { cart } = get();
+    const updatedCart = cart.map((cartItem) =>
+      cartItem.id === itemId
+        ? { ...cartItem, quantity: cartItem.quantity + MINIMUM_QTY_STEP }
+        : cartItem
+    );
+    set({ cart: updatedCart });
+  },
+
+
+  decrementItem: (itemId) => {
+    const { cart } = get();
+    const targetItem = cart.find((cartItem) => cartItem.id === itemId);
+
+    // If decreasing makes the quantity zero or less, remove the item
+    if (targetItem && targetItem.quantity - MINIMUM_QTY_STEP <= 0) {
+      get().removeItem(itemId);
+    } else {
+      // Otherwise, just decrease the quantity
+      const updatedCart = cart.map((cartItem) =>
+        cartItem.id === itemId
+          ? { ...cartItem, quantity: cartItem.quantity - MINIMUM_QTY_STEP }
+          : cartItem
+      );
+      set({ cart: updatedCart });
+    }
+  },
+
+  applyDiscount: (percentage) => {
+    if (percentage >= 0 && percentage <= 100) {
+      set({ discountPercentage: percentage });
+    }
+  },
+
+  clearCart: () => {
+    set({ cart: [], discountPercentage: 0 });
+  },
+
+}));
