@@ -14,11 +14,23 @@ import { Box, Container, Typography } from '@mui/material';
 function RootLayout() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* We can add a Header component here later */}
       <header>
-        <Box sx={{ bgcolor: 'primary.main', p: 2, color: 'white' }}>
+        <Box
+          sx={{
+            bgcolor: 'primary.main',
+            p: 2,
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {/* We are now using the emoji directly, wrapped in Typography for styling */}
+          <Typography sx={{ mr: 1.5, fontSize: '1.75rem', lineHeight: 1 }}>
+            🍿
+          </Typography>
+
           <Typography variant="h6" component="h1">
-            Theeni POS
+            Theeni
           </Typography>
         </Box>
       </header>
