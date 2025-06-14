@@ -5,6 +5,25 @@ import {
   Outlet,
 } from 'react-router';
 import { Box, Container, Typography } from '@mui/material';
+import axios from 'axios';
+
+import PosPage from './pages/PosPage'; 
+import { type Item } from './types';
+
+const API_URL = 'http://127.0.0.1:8000/api/v1/items';
+
+async function itemsLoader(): Promise<Item[]> {
+  try {
+    const response = await axios.get(API_URL);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch items:', error);
+    // In a real app, you'd want to show a proper error message
+    // For now, we'll return an empty array on failure.
+    return [];
+  }
+}
+
 
 /**
  * This is our main application shell.
@@ -52,7 +71,8 @@ const router = createBrowserRouter([
     children: [
       {
         index: true, // This makes it the default child route for '/'
-        element: <Typography>Main Point of Sale Page will go here!</Typography>,
+        loader: itemsLoader,
+        element: <PosPage />,
       },
       // Other routes like '/admin' or '/reports' can be added later
     ],
