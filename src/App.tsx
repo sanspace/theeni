@@ -3,11 +3,14 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
+  Link as RouterLink ,
 } from 'react-router';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Typography, Button, AppBar, Toolbar } from '@mui/material';
 import axios from 'axios';
 
+
 import PosPage from './pages/PosPage'; 
+import ReportsPage from './pages/ReportsPage';
 import { type Item } from './types';
 
 const API_URL = 'http://127.0.0.1:8000/api/v1/items';
@@ -33,26 +36,30 @@ async function itemsLoader(): Promise<Item[]> {
 function RootLayout() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <header>
-        <Box
-          sx={{
-            bgcolor: 'primary.main',
-            p: 2,
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          {/* We are now using the emoji directly, wrapped in Typography for styling */}
-          <Typography sx={{ mr: 1.5, fontSize: '1.75rem', lineHeight: 1 }}>
-            🍿
-          </Typography>
+      <AppBar position="static">
+        {/* Toolbar provides padding and default flex layout */}
+        <Toolbar>
+          {/* This Box will contain the title and grow to push nav links to the right */}
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Typography sx={{ mr: 1.5, fontSize: '1.75rem', lineHeight: 1 }}>
+              🍿
+            </Typography>
+            <Typography variant="h6" component="h1" sx={{ color: 'white' }}>
+              Theeni
+            </Typography>
+          </Box>
 
-          <Typography variant="h6" component="h1">
-            Theeni
-          </Typography>
-        </Box>
-      </header>
+          {/* Navigation Links */}
+          <Box>
+            <Button component={RouterLink} to="/" color="inherit">
+              POS
+            </Button>
+            <Button component={RouterLink} to="/reports" color="inherit">
+              Reports
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
       {/* The main content area */}
       <Container component="main" sx={{ py: 4, flexGrow: 1 }}>
@@ -74,6 +81,10 @@ const router = createBrowserRouter([
         loader: itemsLoader,
         element: <PosPage />,
       },
+      {
+        path: 'reports',
+        element: <ReportsPage />,
+      }
       // Other routes like '/admin' or '/reports' can be added later
     ],
   },
