@@ -11,6 +11,7 @@ import axios from 'axios';
 
 import PosPage from './pages/PosPage'; 
 import ReportsPage from './pages/ReportsPage';
+import AdminPage from './pages/AdminPage';
 import { type Item } from './types';
 
 const API_URL = 'http://127.0.0.1:8000/api/v1/items';
@@ -57,6 +58,9 @@ function RootLayout() {
             <Button component={RouterLink} to="/reports" color="inherit">
               Reports
             </Button>
+            <Button component={RouterLink} to="/admin" color="inherit">
+              Admin
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>
@@ -84,8 +88,13 @@ const router = createBrowserRouter([
       {
         path: 'reports',
         element: <ReportsPage />,
-      }
-      // Other routes like '/admin' or '/reports' can be added later
+      },
+      {
+        path: 'admin',
+        element: <AdminPage />,
+        loader: itemsLoader,
+        shouldRevalidate: () => true,
+      },
     ],
   },
 ]);
