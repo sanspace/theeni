@@ -3,18 +3,42 @@
 // (This is a new file)
 import { useState } from 'react';
 import { useLoaderData, useRevalidator } from 'react-router';
-import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton } from '@mui/material';
 import { type Item } from '../types';
 import EditItemDialog from '../components/EditItemDialog';
+import ConfirmationDialog from '../components/ConfirmationDialog';
+
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
 
 export default function AdminPage() {
   const initialItems = (useLoaderData() as Item[]) || [];
   const [editingItem, setEditingItem] = useState<Partial<Item> | null>(null);
+  const [deletingItem, setDeletingItem] = useState<Item | null>(null);
+
   let revalidator = useRevalidator(); // React Router hook to refetch data
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleCreate = () => {
     // Set editingItem to an empty object to open the dialog in 'Create' mode
     setEditingItem({}); 
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingItem) return;
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/v1/items/${deletingItem.id}`);
+      enqueueSnackbar(`'${deletingItem.name}' was deleted successfully.`, { variant: 'success' });
+      revalidator.revalidate(); // Refresh the item list
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+      enqueueSnackbar('Failed to delete item.', { variant: 'error' });
+    } finally {
+      setDeletingItem(null); // Close the dialog
+    }
   };
 
   return (
@@ -47,9 +71,8 @@ export default function AdminPage() {
                   <TableCell>{item.quick_code || 'N/A'}</TableCell>
                   <TableCell>{item.is_discount_eligible ? 'Yes' : 'No'}</TableCell>
                   <TableCell align="right">
-                    <Button variant="outlined" onClick={() => setEditingItem(item)}>
-                      Edit
-                    </Button>
+                    <IconButton onClick={() => setEditingItem(item)}><EditIcon /></IconButton>
+                    <IconButton onClick={() => setDeletingItem(item)}><DeleteIcon color="error" /></IconButton>
                   </TableCell>
                 </TableRow>
               ))
@@ -72,6 +95,14 @@ export default function AdminPage() {
         open={!!editingItem}
         onClose={() => setEditingItem(null)}
         onSave={() => revalidator.revalidate()} // On save, re-run the loader
+      />
+
+      <ConfirmationDialog
+        open={!!deletingItem}
+        onClose={() => setDeletingItem(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Confirm Deletion"
+        message={`Are you sure you want to permanently delete '${deletingItem?.name}'? This action cannot be undone.`}
       />
     </Box>
   );
