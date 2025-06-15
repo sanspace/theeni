@@ -8,17 +8,13 @@ import {
   TextField,
   Button,
 } from '@mui/material';
-import { useCartStore, type CartItem } from '../store/cartStore'; // Assuming CartItem is exported from your store
+import { useCartStore, type CartItem, selectSubTotal, selectDiscountAmount, selectFinalTotal, selectDiscountableSubTotal } from '../store/cartStore'; // Assuming CartItem is exported from your store
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useSnackbar } from 'notistack';
 
-interface CartProps {
-  onCheckout: () => void;
-}
-
-export default function Cart({ onCheckout }: CartProps) {
+export default function Cart({ onCheckout }: any) {
   const { enqueueSnackbar } = useSnackbar();
   const {
     cart,
@@ -29,16 +25,14 @@ export default function Cart({ onCheckout }: CartProps) {
     applyDiscount,
   } = useCartStore();
 
+  const subTotal = useCartStore(selectSubTotal);
+  const discountableSubTotal = useCartStore(selectDiscountableSubTotal);
+  const discountAmount = useCartStore(selectDiscountAmount);
+  const finalTotal = useCartStore(selectFinalTotal);
+
   const [discountInput, setDiscountInput] = useState(
     discountPercentage.toString()
   );
-
-  const subTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-  const discountAmount = (subTotal * discountPercentage) / 100;
-  const finalTotal = subTotal - discountAmount;
 
   const handleApplyDiscount = () => {
     const percentage = parseFloat(discountInput);
@@ -157,6 +151,12 @@ export default function Cart({ onCheckout }: CartProps) {
             Apply
           </Button>
         </Box>
+
+        {discountPercentage > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+            Discount is applied to a subtotal of ₹{discountableSubTotal.toFixed(2)} from eligible items.
+          </Typography>
+        )}
 
         {discountAmount > 0 && (
           <Box

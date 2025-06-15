@@ -89,3 +89,22 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
 }));
+
+export const selectSubTotal = (state: CartState) => 
+  state.cart.reduce((total, item) => total + item.price * item.quantity, 0);
+
+export const selectDiscountableSubTotal = (state: CartState) =>
+  state.cart
+    .filter(item => item.is_discount_eligible)
+    .reduce((total, item) => total + item.price * item.quantity, 0);
+
+export const selectDiscountAmount = (state: CartState) => {
+  const discountableSubTotal = selectDiscountableSubTotal(state);
+  return (discountableSubTotal * state.discountPercentage) / 100;
+};
+
+export const selectFinalTotal = (state: CartState) => {
+  const subTotal = selectSubTotal(state);
+  const discountAmount = selectDiscountAmount(state);
+  return subTotal - discountAmount;
+};
