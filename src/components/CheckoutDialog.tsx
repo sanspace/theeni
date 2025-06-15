@@ -14,15 +14,13 @@ import {
   Divider,
 } from '@mui/material';
 import { useCartStore } from '../store/cartStore';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import { enqueueSnackbar, useSnackbar } from 'notistack';
 
 interface CheckoutDialogProps {
   open: boolean;
   onClose: () => void;
 }
-
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/orders`;
 
 export default function CheckoutDialog({ open, onClose }: CheckoutDialogProps) {
   // We read the state directly from the store within the dialog
@@ -49,7 +47,7 @@ export default function CheckoutDialog({ open, onClose }: CheckoutDialogProps) {
     
     try {
       // 2. Send the data to the backend
-      await axios.post(API_URL, orderData);
+      await axios.post('/api/v1/orders', orderData);
       
       enqueueSnackbar('Order saved successfully!', { variant: 'success' });
       

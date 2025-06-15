@@ -5,6 +5,7 @@ import {
   RouterProvider,
   Outlet,
   Link as RouterLink,
+  useNavigate,
 } from 'react-router';
 import {
   Box,
@@ -15,21 +16,24 @@ import {
   Toolbar,
   CircularProgress,
 } from '@mui/material';
-import axios from 'axios';
+
 import { type Item } from './types';
 
 // Page Imports
 import PosPage from './pages/PosPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuthStore } from './store/authStore';
+
+import axios from './api/axiosInstance';
 
 // --- Loader Function ---
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
-
 async function itemsLoader(): Promise<Item[]> {
   // This function remains the same
   try {
-    const response = await axios.get(API_URL);
+    const response = await axios.get('/api/v1/items');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch items:', error);
@@ -39,6 +43,14 @@ async function itemsLoader(): Promise<Item[]> {
 
 // --- Root Layout Component ---
 function RootLayout() {
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+  
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar position="static">
@@ -52,15 +64,31 @@ function RootLayout() {
             </Typography>
           </Box>
           <Box>
-            <Button component={RouterLink} to="/" color="inherit">
-              POS
-            </Button>
-            <Button component={RouterLink} to="/reports" color="inherit">
-              Reports
-            </Button>
-            <Button component={RouterLink} to="/admin" color="inherit">
-              Admin
-            </Button>
+            {/* The POS button is visible to any logged-in user */}
+            {user && (
+              <Button component={RouterLink} to="/" color="inherit">
+                POS
+              </Button>
+            )}
+
+            {/* Reports and Admin buttons are now visible ONLY to admins */}
+            {user?.role === 'admin' && (
+              <>
+                <Button component={RouterLink} to="/reports" color="inherit">
+                  Reports
+                </Button>
+                <Button component={RouterLink} to="/admin" color="inherit">
+                  Admin
+                </Button>
+              </>
+            )}
+
+            {/* The Logout button is visible to any logged-in user */}
+            {user && (
+              <Button onClick={handleLogout} color="inherit">
+                Logout
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
@@ -86,15 +114,38 @@ const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true, element: <PosPage /> },
-      { path: 'reports', element: <ReportsPage /> },
+      {
+        index: true,
+        element: (
+          // The POS page is accessible to everyone that's logged in
+          <ProtectedRoute allowedRoles={['admin', 'cashier']}>
+            <PosPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'reports',
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ReportsPage />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'admin',
         loader: itemsLoader,
-        element: <AdminPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminPage />
+          </ProtectedRoute>
+        ),
         shouldRevalidate: () => true,
       },
     ],
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
   },
 ]);
 

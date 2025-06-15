@@ -10,9 +10,7 @@ import CheckoutDialog from '../components/CheckoutDialog';
 import { useSnackbar } from 'notistack';
 import { TextField, InputAdornment, Box, CircularProgress, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import axios from 'axios';
-
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
+import axios from '../api/axiosInstance';
 
 function PosPage() {
   const { enqueueSnackbar } = useSnackbar();
@@ -25,7 +23,7 @@ function PosPage() {
     const fetchItems = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(API_URL);
+        const response = await axios.get('/api/v1/items');
         setAllItems(response.data);
       } catch (error) {
         console.error('Failed to fetch items:', error);

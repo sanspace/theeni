@@ -15,13 +15,11 @@ import {
   TableRow,
   CircularProgress,
 } from '@mui/material';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import { CSVLink } from 'react-csv';
 
 // A helper to format dates to YYYY-MM-DD
 const toYYYYMMDD = (date: Date) => date.toISOString().split('T')[0];
-
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/reports/sales`;
 
 export default function ReportsPage() {
   const [reportData, setReportData] = useState<any>(null);
@@ -34,7 +32,7 @@ export default function ReportsPage() {
     setIsLoading(true);
     setReportData(null);
     try {
-      const response = await axios.get(API_URL, {
+      const response = await axios.get('/api/v1/reports/sales', {
         params: { start_date: start, end_date: end }
       });
       setReportData(response.data);

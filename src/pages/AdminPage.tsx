@@ -10,7 +10,7 @@ import ConfirmationDialog from '../components/ConfirmationDialog';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import { useSnackbar } from 'notistack';
 
 export default function AdminPage() {
@@ -30,7 +30,7 @@ export default function AdminPage() {
   const handleDeleteConfirm = async () => {
     if (!deletingItem) return;
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/items/${deletingItem.id}`);
+      await axios.delete(`/api/v1/items/${deletingItem.id}`);
       enqueueSnackbar(`'${deletingItem.name}' was deleted successfully.`, { variant: 'success' });
       revalidator.revalidate(); // Refresh the item list
     } catch (error) {

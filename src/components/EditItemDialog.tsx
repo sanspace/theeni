@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, FormControlLabel, Switch } from '@mui/material';
 import { type Item } from '../types';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import { useSnackbar } from 'notistack';
 
 interface EditItemDialogProps {
@@ -13,8 +13,6 @@ interface EditItemDialogProps {
   onClose: () => void;
   onSave: () => void; // To trigger a data refresh
 }
-
-const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
 
 export default function EditItemDialog({ item, open, onClose, onSave }: EditItemDialogProps) {
   const [formData, setFormData] = useState<Partial<Item>>({});
@@ -56,11 +54,11 @@ export default function EditItemDialog({ item, open, onClose, onSave }: EditItem
     try {
       if (isEditMode) {
         // UPDATE (PUT request)
-        await axios.put(`${API_URL}/${payload.id}`, payload);
+        await axios.put(`/api/v1/items/${payload.id}`, payload);
         enqueueSnackbar('Item updated successfully!', { variant: 'success' });
       } else {
         // CREATE (POST request)
-        await axios.post(API_URL, payload);
+        await axios.post('/api/v1/items', payload);
         enqueueSnackbar('Item created successfully!', { variant: 'success' });
       }
       onSave(); // Tell the parent page to refetch data
