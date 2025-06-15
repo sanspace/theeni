@@ -114,7 +114,7 @@ function PosPage() {
           ) : (
             <Grid container spacing={3} sx={{ mt: 0 }}>
               {filteredItems.map((item) => (
-                <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                <Grid key={item.id} size={{ xs: 4, sm: 4, md: 4, lg: 3 }}>
                   <ItemCard item={item} onClick={handleItemClick} />
                 </Grid>
               ))}
