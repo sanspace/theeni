@@ -14,20 +14,23 @@ interface ItemCardProps {
   onClick: (item: Item) => void;
 }
 
-function ItemCard({ item, onClick }: ItemCardProps) {
-  // A placeholder image if the item doesn't have one
-  const imageUrl = item.image_url || 'https://placehold.co/300x200.png?text=No+Image';
+export default function ItemCard({ item, onClick }: ItemCardProps) {
+  const imageUrl = item.image_url || 'https://placehold.co/800x800.png?text=No+Image';
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardActionArea onClick={() => onClick(item)} sx={{ flexGrow: 1 }}>
+      <CardActionArea 
+        onClick={() => onClick(item)} 
+        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
+      >
         <CardMedia
           component="img"
-          height="140"
+          // enforce a square shape
+          sx={{ aspectRatio: '1 / 1' }}
           image={imageUrl}
           alt={item.name}
         />
-        <CardContent>
+        <CardContent sx={{ flexGrow: 1, width: '100%' }}>
           <Typography gutterBottom variant="h6" component="div" noWrap>
             {item.name}
           </Typography>
@@ -44,5 +47,3 @@ function ItemCard({ item, onClick }: ItemCardProps) {
     </Card>
   );
 }
-
-export default ItemCard;

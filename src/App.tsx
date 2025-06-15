@@ -66,7 +66,7 @@ function RootLayout() {
       </AppBar>
 
       {/* The main content area */}
-      <Container component="main" sx={{ py: 4, flexGrow: 1 }}>
+      <Container component="main" maxWidth="xl" sx={{ py: 4, flexGrow: 1 }}>
         <Outlet />
       </Container>
     </Box>
