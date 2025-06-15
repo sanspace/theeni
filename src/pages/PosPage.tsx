@@ -1,6 +1,5 @@
 // src/pages/PosPage.tsx
-import { useState, useMemo } from 'react';
-import { useLoaderData } from 'react-router';
+import { useState, useMemo, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { type Item } from '../types';
 import ItemCard from '../components/ItemCard';
@@ -9,13 +8,35 @@ import { useCartStore } from '../store/cartStore';
 import QuantitySelectorDialog from '../components/QuantitySelectorDialog';
 import CheckoutDialog from '../components/CheckoutDialog';
 import { useSnackbar } from 'notistack';
-import { TextField, InputAdornment } from '@mui/material';
+import { TextField, InputAdornment, Box, CircularProgress, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import axios from 'axios';
+
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
 
 function PosPage() {
   const { enqueueSnackbar } = useSnackbar();
-  const initialItems = (useLoaderData() as Item[]) || [];
   const upsertItemInCart = useCartStore((state) => state.upsertItem);
+
+  const [allItems, setAllItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(API_URL);
+        setAllItems(response.data);
+      } catch (error) {
+        console.error('Failed to fetch items:', error);
+        enqueueSnackbar('Could not load products.', {variant: 'error'})
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchItems();
+  }, [enqueueSnackbar]);
+
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -23,14 +44,14 @@ function PosPage() {
 
   const filteredItems = useMemo(() => {
     if (!searchTerm) {
-      return initialItems;
+      return allItems;
     }
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    return initialItems.filter(item =>
+    return allItems.filter(item =>
       item.name.toLowerCase().includes(lowerCaseSearchTerm) ||
       item.quick_code?.toLowerCase().includes(lowerCaseSearchTerm)
     );
-  }, [searchTerm, initialItems]);
+  }, [searchTerm, allItems]);
 
   const handleItemClick = (item: Item) => {
     setSelectedItem(item);
@@ -47,7 +68,7 @@ function PosPage() {
 
   const handleSearchKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && searchTerm) {
-      const quickCodeMatch = initialItems.find(item => item.quick_code?.toLowerCase() === searchTerm.toLowerCase());
+      const quickCodeMatch = allItems.find(item => item.quick_code?.toLowerCase() === searchTerm.toLowerCase());
       if (quickCodeMatch) {
         setSelectedItem(quickCodeMatch);
         setSearchTerm('');
@@ -59,6 +80,14 @@ function PosPage() {
       }
     }
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
 
   return (
     <>
@@ -81,14 +110,18 @@ function PosPage() {
             }}
             sx={{ mb: 3 }}
           />
-          
-          <Grid container spacing={3}>
-            {filteredItems.map((item) => (
-              <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <ItemCard item={item} onClick={handleItemClick} />
-              </Grid>
-            ))}
-          </Grid>
+
+          {filteredItems.length === 0 && !isLoading ? (
+            <Typography sx={{ mt: 4, textAlign: 'center' }}>No products match your search.</Typography>
+          ) : (
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              {filteredItems.map((item) => (
+                <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <ItemCard item={item} onClick={handleItemClick} />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </Grid>
 
         {/* Column 2: Cart/Order Summary */}
