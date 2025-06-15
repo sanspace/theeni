@@ -21,7 +21,7 @@ import { CSVLink } from 'react-csv';
 // A helper to format dates to YYYY-MM-DD
 const toYYYYMMDD = (date: Date) => date.toISOString().split('T')[0];
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/reports/sales';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/reports/sales`;
 
 export default function ReportsPage() {
   const [reportData, setReportData] = useState<any>(null);

@@ -14,7 +14,7 @@ import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 import { type Item } from './types';
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/items';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
 
 async function itemsLoader(): Promise<Item[]> {
   try {

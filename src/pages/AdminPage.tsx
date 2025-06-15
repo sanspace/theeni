@@ -30,7 +30,7 @@ export default function AdminPage() {
   const handleDeleteConfirm = async () => {
     if (!deletingItem) return;
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/items/${deletingItem.id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/items/${deletingItem.id}`);
       enqueueSnackbar(`'${deletingItem.name}' was deleted successfully.`, { variant: 'success' });
       revalidator.revalidate(); // Refresh the item list
     } catch (error) {

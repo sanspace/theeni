@@ -14,7 +14,7 @@ interface EditItemDialogProps {
   onSave: () => void; // To trigger a data refresh
 }
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/items';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/items`;
 
 export default function EditItemDialog({ item, open, onClose, onSave }: EditItemDialogProps) {
   const [formData, setFormData] = useState<Partial<Item>>({});

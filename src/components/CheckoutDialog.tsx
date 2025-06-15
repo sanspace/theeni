@@ -22,7 +22,7 @@ interface CheckoutDialogProps {
   onClose: () => void;
 }
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/orders';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1/orders`;
 
 export default function CheckoutDialog({ open, onClose }: CheckoutDialogProps) {
   // We read the state directly from the store within the dialog
