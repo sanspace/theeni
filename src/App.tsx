@@ -24,6 +24,7 @@ import PosPage from './pages/PosPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
+import CustomersPage from './pages/CustomersPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 
@@ -76,6 +77,9 @@ function RootLayout() {
               <>
                 <Button component={RouterLink} to="/reports" color="inherit">
                   Reports
+                </Button>
+                <Button component={RouterLink} to="/customers" color="inherit">
+                  Customers
                 </Button>
                 <Button component={RouterLink} to="/admin" color="inherit">
                   Admin
@@ -140,6 +144,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         shouldRevalidate: () => true,
+      },
+      {
+        path: 'customers',
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <CustomersPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

@@ -15,3 +15,12 @@ export interface Customer {
   phone_number: string | null;
   email: string | null;
 }
+
+export interface CustomerReportItem {
+  id: number;
+  name: string;
+  phone_number: string | null;
+  email: string | null;
+  total_orders: number;
+  total_spent: number;
+}
