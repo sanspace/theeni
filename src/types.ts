@@ -8,3 +8,10 @@ export interface Item {
   is_discount_eligible: boolean;
   image_url: string | null;
 }
+
+export interface Customer {
+  id: number;
+  name: string;
+  phone_number: string | null;
+  email: string | null;
+}

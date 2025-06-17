@@ -1,6 +1,6 @@
 // src/store/cartStore.ts
 import { create } from 'zustand';
-import { type Item } from '../types';
+import { type Item, type Customer } from '../types';
 
 export interface CartItem extends Item {
   quantity: number; // Quantity will now represent kg
@@ -9,6 +9,7 @@ export interface CartItem extends Item {
 interface CartState {
   cart: CartItem[];
   discountPercentage: number;
+  customer: Customer | null;
 
   // actions
   upsertItem: (item: Item, quantity: number) => void; // "upsert" = update or insert
@@ -16,6 +17,7 @@ interface CartState {
   incrementItem: (itemId: number) => void;
   decrementItem: (itemId: number) => void;
   applyDiscount: (percentage: number) => void;
+  setCustomer: (customer: Customer | null) => void;
   clearCart: () => void;
 }
 
@@ -24,6 +26,7 @@ const MINIMUM_QTY_STEP = 0.25;
 export const useCartStore = create<CartState>((set, get) => ({
   cart: [],
   discountPercentage: 0,
+  customer: null,
 
   upsertItem: (item, quantity) => {
     const { cart } = get();
@@ -84,8 +87,12 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
+  setCustomer: (customer) => {
+    set({ customer });
+  },
+
   clearCart: () => {
-    set({ cart: [], discountPercentage: 0 });
+    set({ cart: [], discountPercentage: 0, customer: null });
   },
 
 }));

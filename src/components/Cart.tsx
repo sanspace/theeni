@@ -8,14 +8,29 @@ import {
   TextField,
   Button,
 } from '@mui/material';
-import { useCartStore, type CartItem, selectSubTotal, selectDiscountAmount, selectFinalTotal, selectDiscountableSubTotal } from '../store/cartStore'; // Assuming CartItem is exported from your store
+import {
+  useCartStore,
+  selectSubTotal,
+  selectDiscountAmount,
+  selectFinalTotal,
+  selectDiscountableSubTotal,
+} from '../store/cartStore';
+import type { CartItem } from '../store/cartStore';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useSnackbar } from 'notistack';
+import CustomerSearch from './CustomerSearch';
 
-export default function Cart({ onCheckout }: any) {
+interface CartProps {
+  onCheckout: () => void;
+  onCreateCustomer: (name: string) => void;
+}
+
+export default function Cart({ onCheckout, onCreateCustomer }: CartProps) {
   const { enqueueSnackbar } = useSnackbar();
+
   const {
     cart,
     incrementItem,
@@ -23,6 +38,8 @@ export default function Cart({ onCheckout }: any) {
     removeItem,
     discountPercentage,
     applyDiscount,
+    customer,
+    setCustomer,
   } = useCartStore();
 
   const subTotal = useCartStore(selectSubTotal);
@@ -41,7 +58,7 @@ export default function Cart({ onCheckout }: any) {
       enqueueSnackbar(`${percentage}% discount applied!`, { variant: 'info' });
     }
   };
-  
+
   const handleDiscountKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
       handleApplyDiscount();
@@ -65,6 +82,50 @@ export default function Cart({ onCheckout }: any) {
         top: 24,
       }}
     >
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+          Customer
+        </Typography>
+        {customer ? (
+          <Paper
+            elevation={1}
+            sx={{
+              p: 1.5,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontWeight: 'bold' }}>
+                {customer.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {customer.phone_number || customer.email}
+              </Typography>
+            </Box>
+            <Button size="small" onClick={() => setCustomer(null)}>
+              Remove
+            </Button>
+          </Paper>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <CustomerSearch
+              onSelectCustomer={(c) => setCustomer(c)}
+              onCreateNew={onCreateCustomer}
+            />
+            <Button
+              size="small"
+              startIcon={<PersonAddIcon />}
+              onClick={() => onCreateCustomer('')}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Create New
+            </Button>
+          </Box>
+        )}
+      </Box>
+
       <Typography variant="h5" component="h3" gutterBottom>
         Current Order
       </Typography>
@@ -152,12 +213,6 @@ export default function Cart({ onCheckout }: any) {
           </Button>
         </Box>
 
-        {discountPercentage > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-            Discount is applied to a subtotal of ₹{discountableSubTotal.toFixed(2)} from eligible items.
-          </Typography>
-        )}
-
         {discountAmount > 0 && (
           <Box
             sx={{
@@ -167,7 +222,7 @@ export default function Cart({ onCheckout }: any) {
             }}
           >
             <Typography variant="body1" color="inherit">
-              Discount:
+              Discount (on ₹{discountableSubTotal.toFixed(2)}):
             </Typography>
             <Typography variant="body1" color="inherit">
               - ₹{discountAmount.toFixed(2)}
