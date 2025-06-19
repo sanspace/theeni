@@ -15,9 +15,17 @@ import {
   AppBar,
   Toolbar,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 
 import { type Item } from './types';
+
+// Icons for the Menu
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import PeopleIcon from '@mui/icons-material/People';
+import WidgetsIcon from '@mui/icons-material/Widgets';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // Page Imports
 import PosPage from './pages/PosPage';
@@ -51,6 +59,13 @@ function RootLayout() {
     logout();
     navigate('/login');
   };
+
+  const navItems = [
+    { label: 'POS', path: '/', icon: <PointOfSaleIcon />, roles: ['admin', 'cashier'] },
+    { label: 'Dashboard', path: '/reports', icon: <AssessmentIcon />, roles: ['admin'] },
+    { label: 'Customers', path: '/customers', icon: <PeopleIcon />, roles: ['admin'] },
+    { label: 'Products', path: '/admin', icon: <WidgetsIcon />, roles: ['admin'] },
+  ];
   
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -64,34 +79,47 @@ function RootLayout() {
               Theeni
             </Typography>
           </Box>
-          <Box>
-            {/* The POS button is visible to any logged-in user */}
-            {user && (
-              <Button component={RouterLink} to="/" color="inherit">
-                POS
-              </Button>
-            )}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {user && navItems.map((item) => (
+              item.roles.includes(user.role) && (
+                <Tooltip title={item.label} key={item.label}>
+                  <Button
+                    component={RouterLink}
+                    to={item.path}
+                    startIcon={item.icon}
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      minWidth: 0,
+                      px: { xs: 1.5, md: 2 },
+                      '& .MuiButton-startIcon': { margin: { xs: 0, md: '0 8px 0 -4px' } },
+                    }}
+                  >
+                    <Typography component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                      {item.label}
+                    </Typography>
+                  </Button>
+                </Tooltip>
+              )
+            ))}
 
-            {/* Reports and Admin buttons are now visible ONLY to admins */}
-            {user?.role === 'admin' && (
-              <>
-                <Button component={RouterLink} to="/reports" color="inherit">
-                  Reports
-                </Button>
-                <Button component={RouterLink} to="/customers" color="inherit">
-                  Customers
-                </Button>
-                <Button component={RouterLink} to="/admin" color="inherit">
-                  Admin
-                </Button>
-              </>
-            )}
-
-            {/* The Logout button is visible to any logged-in user */}
+            {/* THIS IS THE UPDATED LOGOUT BUTTON */}
             {user && (
-              <Button onClick={handleLogout} color="inherit">
-                Logout
-              </Button>
+              <Tooltip title="Logout">
+                <Button
+                  onClick={handleLogout}
+                  startIcon={<LogoutIcon />}
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    minWidth: 0,
+                    px: { xs: 1.5, md: 2 },
+                    '& .MuiButton-startIcon': { margin: { xs: 0, md: '0 8px 0 -4px' } },
+                  }}
+                >
+                  <Typography component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                    Logout
+                  </Typography>
+                </Button>
+              </Tooltip>
             )}
           </Box>
         </Toolbar>
