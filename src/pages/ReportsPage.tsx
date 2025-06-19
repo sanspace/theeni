@@ -20,6 +20,9 @@ import {
 import axiosInstance from '../api/axiosInstance';
 import { CSVLink } from 'react-csv';
 
+import OrderDetailsDialog from '../components/OrderDetailsDialog';
+import type { OrderDetailLineItem } from '../types';
+
 // A helper to format dates to YYYY-MM-DD
 const toYYYYMMDD = (date: Date) => date.toISOString().split('T')[0];
 
@@ -35,6 +38,7 @@ export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [reportTitle, setReportTitle] = useState('');
+  const [viewingOrderId, setViewingOrderId] = useState<number | null>(null);
 
   const today = new Date();
   const [startDate, setStartDate] = useState(toYYYYMMDD(today));
@@ -178,7 +182,30 @@ export default function ReportsPage() {
             )}
             
             {currentTab === 1 && (
-              <TableContainer><Table stickyHeader><TableHead><TableRow><TableCell>Order ID</TableCell><TableCell>Date & Time</TableCell><TableCell>Customer</TableCell><TableCell align="right">Total</TableCell></TableRow></TableHead><TableBody>{reportData.orderDetails.map((order: any) => (<TableRow hover key={order.id}><TableCell>#{order.id}</TableCell><TableCell>{new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</TableCell><TableCell>{order.customer_name || 'N/A'}</TableCell><TableCell align="right">₹{order.final_total.toFixed(2)}</TableCell></TableRow>))}</TableBody></Table></TableContainer>
+              <TableContainer>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Order ID</TableCell><TableCell>Date & Time</TableCell><TableCell>Customer</TableCell><TableCell align="right">Total</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {reportData.orderDetails.map((order: any) => (
+                      <TableRow
+                        hover
+                        key={order.id}
+                        onClick={() => setViewingOrderId(order.id)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell>#{order.id}</TableCell>
+                        <TableCell>{new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
+                        <TableCell>{order.customer_name || 'N/A'}</TableCell>
+                        <TableCell align="right">₹{order.final_total.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )}
 
             {currentTab === 2 && (
@@ -200,6 +227,11 @@ export default function ReportsPage() {
           </Paper>
         </Box>
       )}
+      <OrderDetailsDialog
+        open={!!viewingOrderId}
+        onClose={() => setViewingOrderId(null)}
+        orderId={viewingOrderId}
+      />
     </Box>
   );
 }

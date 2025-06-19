@@ -30,3 +30,11 @@ export interface OrderHistoryItem {
   created_at: string;
   final_total: number;
 }
+
+export interface OrderDetailLineItem {
+  id: number;
+  item_name: string;
+  quantity: number;
+  price_per_unit: number;
+  subtotal: number;
+}
