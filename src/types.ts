@@ -24,3 +24,9 @@ export interface CustomerReportItem {
   total_orders: number;
   total_spent: number;
 }
+
+export interface OrderHistoryItem {
+  id: number;
+  created_at: string;
+  final_total: number;
+}
